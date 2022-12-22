@@ -2,107 +2,28 @@ Regression_Analysis
 ================
 
 ``` r
-#install.packages('hydroTSM', 'dplyr', 'stringr', 'lmtest', 'olsrr', 'stargazer', 'stdmod', 'ggplot2', 'lubridate')
-library(hydroTSM)
-```
+#install.packages('hydroTSM', 'dplyr', 'stringr', 'lmtest', 'olsrr', 'stargazer', 'stdmod', 'ggplot2', 'lubridate', 'car')
 
-    ## Loading required package: zoo
+requiredPackages = c('hydroTSM', 'dplyr', 'stringr', 'lmtest', 'olsrr', 'stargazer', 'stdmod', 'ggplot2', 'lubridate', 'car')
+suppressMessages(
+ for (p in requiredPackages) {
+  if (!require(p, character.only = TRUE)){
+   install.packages(p)
+  }
+  library(p, character.only = TRUE)
+ }
+)
+```
 
     ## Warning: package 'zoo' was built under R version 4.1.2
 
-    ## 
-    ## Attaching package: 'zoo'
-
-    ## The following objects are masked from 'package:base':
-    ## 
-    ##     as.Date, as.Date.numeric
-
-    ## Loading required package: xts
-
-``` r
-library(dplyr)
-```
-
-    ## 
-    ## Attaching package: 'dplyr'
-
-    ## The following objects are masked from 'package:xts':
-    ## 
-    ##     first, last
-
-    ## The following objects are masked from 'package:stats':
-    ## 
-    ##     filter, lag
-
-    ## The following objects are masked from 'package:base':
-    ## 
-    ##     intersect, setdiff, setequal, union
-
-``` r
-library(stringr)
-library(lmtest)
-```
-
     ## Warning: package 'lmtest' was built under R version 4.1.2
-
-``` r
-library(olsrr)
-```
-
-    ## 
-    ## Attaching package: 'olsrr'
-
-    ## The following object is masked from 'package:datasets':
-    ## 
-    ##     rivers
-
-``` r
-library(stargazer)
-```
-
-    ## 
-    ## Please cite as:
-
-    ##  Hlavac, Marek (2018). stargazer: Well-Formatted Regression and Summary Statistics Tables.
-
-    ##  R package version 5.2.2. https://CRAN.R-project.org/package=stargazer
-
-``` r
-library(stdmod)
-```
 
     ## Warning: package 'stdmod' was built under R version 4.1.2
 
-``` r
-library(ggplot2)
-library(car)
-```
-
-    ## Loading required package: carData
-
-    ## 
-    ## Attaching package: 'car'
-
-    ## The following object is masked from 'package:dplyr':
-    ## 
-    ##     recode
-
-``` r
-library(lubridate)
-```
-
     ## Warning: package 'lubridate' was built under R version 4.1.2
 
-    ## Loading required package: timechange
-
     ## Warning: package 'timechange' was built under R version 4.1.2
-
-    ## 
-    ## Attaching package: 'lubridate'
-
-    ## The following objects are masked from 'package:base':
-    ## 
-    ##     date, intersect, setdiff, union
 
 ``` r
 data <- read.csv('netflix_top10movies.csv', sep = ';')
