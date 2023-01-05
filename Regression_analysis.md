@@ -34,6 +34,7 @@ data <- read.csv('netflix_top10movies.csv', sep = ';')
 data$date_top10 <- as.Date(data$date_top10, format="%d-%m-%Y")
 data$release_netflix<- as.Date(data$release_netflix, format="%d-%m-%Y")
 data$release_theater<- as.Date(data$release_theater, format="%d-%m-%Y")
+data$Holdback_period <- (interval((data$release_theater), (data$release_netflix)) %/% months(1))
 ```
 
 ``` r
@@ -59,7 +60,7 @@ df$box_office_performance <- round(df$box_office_performance, 2)
 ``` r
 #rename columns
 df <- df %>%
-  rename("Holdback_period" = "holdback_months", 'Box_office_performance' = 'box_office_performance', 'Online_ratings' = 'meta_rating', 'Viewership_on_Netflix' = 'viewership')
+  rename('Box_office_performance' = 'box_office_performance', 'Online_ratings' = 'meta_rating', 'Viewership_on_Netflix' = 'viewership')
 ```
 
 ``` r
@@ -79,18 +80,18 @@ summary(modelzl)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -22.358  -5.344  -1.206   3.552  80.529 
+    ## -22.369  -5.350  -1.205   3.557  80.568 
     ## 
     ## Coefficients:
     ##                                          Estimate Std. Error t value Pr(>|t|)
-    ## (Intercept)                             1.187e+01  3.165e+00   3.751 0.000231
-    ## Holdback_period                        -4.124e-03  9.628e-03  -0.428 0.668841
-    ## Box_office_performance                  1.065e-01  1.796e-02   5.929 1.32e-08
-    ## Online_ratings                         -1.104e-01  5.021e-02  -2.198 0.029104
-    ## Release_spring                          2.673e+00  2.070e+00   1.291 0.198071
-    ## Release_summer                         -1.836e+00  2.108e+00  -0.871 0.384836
-    ## Release_fall                           -2.068e+00  2.239e+00  -0.924 0.356833
-    ## Holdback_period:Box_office_performance -2.359e-04  8.875e-05  -2.659 0.008483
+    ## (Intercept)                             1.187e+01  3.163e+00   3.754 0.000228
+    ## Holdback_period                        -4.130e-03  9.636e-03  -0.429 0.668705
+    ## Box_office_performance                  1.062e-01  1.790e-02   5.935 1.28e-08
+    ## Online_ratings                         -1.104e-01  5.022e-02  -2.198 0.029105
+    ## Release_spring                          2.668e+00  2.070e+00   1.289 0.198887
+    ## Release_summer                         -1.836e+00  2.108e+00  -0.871 0.384903
+    ## Release_fall                           -2.072e+00  2.239e+00  -0.925 0.355863
+    ## Holdback_period:Box_office_performance -2.356e-04  8.876e-05  -2.654 0.008597
     ##                                           
     ## (Intercept)                            ***
     ## Holdback_period                           
@@ -103,9 +104,9 @@ summary(modelzl)
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 10.93 on 200 degrees of freedom
-    ## Multiple R-squared:  0.2676, Adjusted R-squared:  0.242 
-    ## F-statistic: 10.44 on 7 and 200 DF,  p-value: 3.725e-11
+    ## Residual standard error: 10.94 on 200 degrees of freedom
+    ## Multiple R-squared:  0.2675, Adjusted R-squared:  0.2418 
+    ## F-statistic: 10.43 on 7 and 200 DF,  p-value: 3.778e-11
 
 ## Assumptions
 
@@ -138,7 +139,7 @@ lmtest::bptest(modelzl)
     ##  studentized Breusch-Pagan test
     ## 
     ## data:  modelzl
-    ## BP = 26.496, df = 7, p-value = 0.0004105
+    ## BP = 26.462, df = 7, p-value = 0.0004164
 
 ``` r
 #homoskedasticity after log transformation
@@ -181,21 +182,21 @@ ols_test_normality(model)
     ##        Test             Statistic       pvalue  
     ## -----------------------------------------------
     ## Shapiro-Wilk              0.9798         0.0044 
-    ## Kolmogorov-Smirnov        0.0612         0.4178 
-    ## Cramer-von Mises         14.0037         0.0000 
-    ## Anderson-Darling          1.2053         0.0038 
+    ## Kolmogorov-Smirnov        0.0612         0.4169 
+    ## Cramer-von Mises         14.0027         0.0000 
+    ## Anderson-Darling          1.2058         0.0037 
     ## -----------------------------------------------
 
 ``` r
 #multicollinearity
-modelmulti <- lm(log(Viewership_on_Netflix) ~ Holdback_period + Box_office_performance + Online_ratings + Release_summer + Release_winter + Release_fall, data = df)
+modelmulti <- lm(log(Viewership_on_Netflix) ~ Holdback_period + Box_office_performance + Online_ratings + Release_spring + Release_summer +  Release_fall, data = df)
 car::vif(modelmulti)
 ```
 
     ##        Holdback_period Box_office_performance         Online_ratings 
-    ##               1.096987               1.236177               1.220121 
-    ##         Release_summer         Release_winter           Release_fall 
-    ##               1.478708               1.511375               1.541675
+    ##               1.097068               1.236227               1.220120 
+    ##         Release_spring         Release_summer           Release_fall 
+    ##               1.429678               1.407185               1.466183
 
 ``` r
 vif_values <- vif(modelmulti)
@@ -271,7 +272,7 @@ stargazer(model1, model2, model3, title = 'Results', align = TRUE, type = 'text'
     ## Holdback_period:Box_office_performance                              -0.00001*                             
     ##                                                                     (0.00001)                             
     ##                                                                                                           
-    ## Constant                                      2.482***               2.363***              2.259***       
+    ## Constant                                      2.481***               2.363***              2.259***       
     ##                                               (0.212)                (0.222)                (0.222)       
     ##                                                                                                           
     ## ----------------------------------------------------------------------------------------------------------
@@ -279,7 +280,7 @@ stargazer(model1, model2, model3, title = 'Results', align = TRUE, type = 'text'
     ## R2                                             0.215                  0.227                  0.063        
     ## Adjusted R2                                    0.192                  0.200                  0.045        
     ## Residual Std. Error                       0.770 (df = 201)       0.767 (df = 200)      0.838 (df = 203)   
-    ## F Statistic                            9.194*** (df = 6; 201) 8.387*** (df = 7; 200) 3.412** (df = 4; 203)
+    ## F Statistic                            9.194*** (df = 6; 201) 8.385*** (df = 7; 200) 3.412** (df = 4; 203)
     ## ==========================================================================================================
     ## Note:                                                                          *p<0.1; **p<0.05; ***p<0.01
 
@@ -338,15 +339,15 @@ stargazer(model1, model2, title = 'Results', align = TRUE, type = 'text')
     ## Holdback_period:Box_office_performance                               -0.00001       
     ##                                                                     (0.00001)       
     ##                                                                                     
-    ## Constant                                      2.301***               2.235***       
-    ##                                               (0.196)                (0.201)        
+    ## Constant                                      2.300***               2.235***       
+    ##                                               (0.195)                (0.201)        
     ##                                                                                     
     ## ------------------------------------------------------------------------------------
     ## Observations                                    191                    191          
     ## R2                                             0.224                  0.231         
     ## Adjusted R2                                    0.198                  0.201         
     ## Residual Std. Error                       0.656 (df = 184)       0.655 (df = 183)   
-    ## F Statistic                            8.832*** (df = 6; 184) 7.847*** (df = 7; 183)
+    ## F Statistic                            8.831*** (df = 6; 184) 7.843*** (df = 7; 183)
     ## ====================================================================================
     ## Note:                                                    *p<0.1; **p<0.05; ***p<0.01
 
@@ -356,6 +357,7 @@ stargazer(model1, model2, title = 'Results', align = TRUE, type = 'text')
 #select where release date on Netflix is missing and impute 
 df1 <- data[is.na(data$release_netflix), ]  
 df1$release_netflix <- df1$date_top10 %m-% months(6) 
+df1$Holdback_period <- (interval((df1$release_theater), (df1$release_netflix)) %/% months(1))
 
 #append two dataframes
 df2 <- data[!is.na(data$release_netflix), ]  
@@ -380,7 +382,7 @@ df1$box_office_performance <- round(df1$box_office_performance, 2)
 ``` r
 #rename columns
 df1 <- df1 %>%
-  rename("Holdback_period" = "holdback_months", 'Box_office_performance' = 'box_office_performance', 'Online_ratings' = 'meta_rating', 'Viewership_on_Netflix' = 'viewership')
+  rename('Box_office_performance' = 'box_office_performance', 'Online_ratings' = 'meta_rating', 'Viewership_on_Netflix' = 'viewership')
 ```
 
 ``` r
@@ -412,10 +414,10 @@ stargazer(model1, model2, title = 'Results', align = TRUE, type = 'text')
     ## Release_spring                                 -0.068                 -0.055        
     ##                                               (0.137)                (0.137)        
     ##                                                                                     
-    ## Release_summer                                 -0.197                 -0.187        
+    ## Release_summer                                 -0.196                 -0.187        
     ##                                               (0.137)                (0.137)        
     ##                                                                                     
-    ## Release_fall                                  -0.275*                -0.262*        
+    ## Release_fall                                  -0.274*                -0.262*        
     ##                                               (0.145)                (0.145)        
     ##                                                                                     
     ## Holdback_period:Box_office_performance                               -0.00001       
@@ -426,10 +428,10 @@ stargazer(model1, model2, title = 'Results', align = TRUE, type = 'text')
     ##                                                                                     
     ## ------------------------------------------------------------------------------------
     ## Observations                                    309                    309          
-    ## R2                                             0.149                  0.156         
+    ## R2                                             0.149                  0.157         
     ## Adjusted R2                                    0.132                  0.137         
-    ## Residual Std. Error                       0.856 (df = 302)       0.854 (df = 301)   
-    ## F Statistic                            8.803*** (df = 6; 302) 7.969*** (df = 7; 301)
+    ## Residual Std. Error                       0.856 (df = 302)       0.853 (df = 301)   
+    ## F Statistic                            8.815*** (df = 6; 302) 7.979*** (df = 7; 301)
     ## ====================================================================================
     ## Note:                                                    *p<0.1; **p<0.05; ***p<0.01
 
@@ -485,20 +487,20 @@ stargazer(model1, model2, title = 'Results', align = TRUE, type = 'text')
     ## Release_summer                                 -0.168                 -0.163        
     ##                                               (0.139)                (0.139)        
     ##                                                                                     
-    ## Release_fall                                   -0.224                 -0.217        
+    ## Release_fall                                   -0.223                 -0.216        
     ##                                               (0.148)                (0.147)        
     ##                                                                                     
     ## Holdback_period:Box_office_performance                               -0.00001       
     ##                                                                     (0.00001)       
     ##                                                                                     
     ## Constant                                      2.062***               1.962***       
-    ##                                               (0.189)                (0.202)        
+    ##                                               (0.189)                (0.201)        
     ##                                                                                     
     ## ------------------------------------------------------------------------------------
     ## Observations                                    288                    288          
     ## R2                                             0.155                  0.161         
     ## Adjusted R2                                    0.137                  0.140         
     ## Residual Std. Error                       0.830 (df = 281)       0.828 (df = 280)   
-    ## F Statistic                            8.590*** (df = 6; 281) 7.664*** (df = 7; 280)
+    ## F Statistic                            8.605*** (df = 6; 281) 7.678*** (df = 7; 280)
     ## ====================================================================================
     ## Note:                                                    *p<0.1; **p<0.05; ***p<0.01
